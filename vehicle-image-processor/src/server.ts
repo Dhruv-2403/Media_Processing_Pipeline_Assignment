@@ -8,15 +8,10 @@ import uploadRouter from './api/upload';
 import jobsRouter from './api/jobs';
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors({
-  origin: [
-    'https://media-processing-pipeline-assignmen.vercel.app/'
-    
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+
+
+app.use(cors());
+
 app.use(express.json());
 
 // Serve static frontend
