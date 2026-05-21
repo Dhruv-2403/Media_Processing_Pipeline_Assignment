@@ -9,9 +9,21 @@ import jobsRouter from './api/jobs';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS middleware - allow all origins
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 
 app.use(cors());
-
 app.use(express.json());
 
 // Serve static frontend
