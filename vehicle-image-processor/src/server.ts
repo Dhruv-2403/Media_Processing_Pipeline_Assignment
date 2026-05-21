@@ -8,7 +8,10 @@ import uploadRouter from './api/upload';
 import jobsRouter from './api/jobs';
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  credentials: true
+}));
 app.use(express.json());
 
 // Serve static frontend
