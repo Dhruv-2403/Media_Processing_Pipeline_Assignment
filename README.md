@@ -259,7 +259,7 @@ Query params: `status` · `page` (default 1) · `limit` (default 20, max 100)
 ### 1. Clone & install
 
 ```bash
-git clone <repo-url>
+git clone [<repo-url>](https://github.com/Dhruv-2403/Media_Processing_Pipeline_Assignment)
 cd vehicle-image-processor
 npm install
 ```
