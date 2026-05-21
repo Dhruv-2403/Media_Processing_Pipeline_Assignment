@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import path from 'path';
 import { connectDB } from './db/connection';
 import logger from './utils/logger';
 import uploadRouter from './api/upload';
@@ -9,6 +10,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
+
+// Serve static frontend
+app.use(express.static(path.join(__dirname, '../public')));
+
 app.use((req: Request, _res: Response, next: NextFunction) => {
   logger.info(`${req.method} ${req.url}`);
   next();

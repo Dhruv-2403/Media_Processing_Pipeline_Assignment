@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Image Processor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .upload-area {
+            border: 2px dashed #d0d0d0;
+            border-radius: 8px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fafafa;
+            text-align: center;
+        }
+
+        .upload-area:hover {
+            border-color: #999;
+            background: #f5f5f5;
+        }
+
+        .upload-area.dragover {
+            border-color: #000;
+            background: #f0f0f0;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        .upload-text {
+            font-size: 0.9375rem;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .upload-text .browse {
+            color: #000;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 0.8125rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #000;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .verdict-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .verdict-clean { background: #d4edda; color: #155724; }
+        .verdict-warning { background: #fff3cd; color: #856404; }
+        .verdict-rejected { background: #f8d7da; color: #721c24; }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.8125rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #000;
+        }
+
+        .check-item {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #fafafa;
+            border-left: 3px solid;
+        }
+
+        .check-item.passed {
+            background: #f0f9f0;
+            border-color: #28a745;
+        }
+
+        .check-item.failed-warning {
+            background: #fffbf0;
+            border-color: #ffc107;
+        }
+
+        .check-item.failed-critical {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+
+        .check-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.8125rem;
+            color: #000;
+        }
+
+        .check-message {
+            font-size: 0.8125rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            margin: 20px 0 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.3;
+        }
+
+        .empty-text {
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vehicle Image Processor</h1>
+        <p class="subtitle">Upload an image to analyze quality and validity</p>
+
+        <div class="card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">↑</div>
+                <div class="upload-text">Drop an image here, or <span class="browse">browse</span></div>
+                <div class="upload-hint">JPEG · PNG · WebP · up to 10 MB</div>
+            </div>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif">
+            <div id="uploadMessage"></div>
+        </div>
+
+        <div class="card" id="resultSection">
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">📊</div>
+                <div class="empty-text">No results yet</div>
+            </div>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentJobId = null;
+        let pollInterval = null;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadMessage = document.getElementById('uploadMessage');
+        const resultSection = document.getElementById('resultSection');
+        const emptyState = document.getElementById('emptyState');
+        const resultContent = document.getElementById('resultContent');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        async function handleFileUpload(file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                showMessage('error', 'Invalid file type. Please upload JPEG, PNG, WEBP, or GIF.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showMessage('error', 'File too large. Maximum size is 10MB.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            showMessage('loading', 'Uploading...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    currentJobId = data.jobId;
+                    showMessage('success', 'Upload successful!');
+                    startPolling(data.jobId);
+                } else {
+                    showMessage('error', data.error || 'Upload failed');
+                }
+            } catch (error) {
+                showMessage('error', 'Network error: ' + error.message);
+            }
+        }
+
+        function showMessage(type, message) {
+            const className = type === 'error' ? 'error-message' : 
+                            type === 'success' ? 'success-message' : 'loading';
+            
+            if (type === 'loading') {
+                uploadMessage.innerHTML = `
+                    <div class="${className}">
+                        <div class="spinner"></div>
+                        <div>${message}</div>
+                    </div>
+                `;
+            } else {
+                uploadMessage.innerHTML = `<div class="${className}">${message}</div>`;
+            }
+        }
+
+        function startPolling(jobId) {
+            emptyState.style.display = 'none';
+            resultContent.innerHTML = '<div class="loading"><div class="spinner"></div><div>Processing...</div></div>';
+            
+            if (pollInterval) clearInterval(pollInterval);
+            
+            pollStatus(jobId);
+            pollInterval = setInterval(() => pollStatus(jobId), 2000);
+        }
+
+        async function pollStatus(jobId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/status/${jobId}`);
+                const data = await response.json();
+
+                if (data.status === 'completed') {
+                    clearInterval(pollInterval);
+                    fetchResult(jobId);
+                } else if (data.status === 'failed') {
+                    clearInterval(pollInterval);
+                    resultContent.innerHTML = `<div class="message error-message">Failed: ${data.failureReason}</div>`;
+                }
+            } catch (error) {
+                console.error('Status poll error:', error);
+            }
+        }
+
+        async function fetchResult(jobId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/result/${jobId}`);
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    displayResult(data);
+                }
+            } catch (error) {
+                console.error('Result fetch error:', error);
+            }
+        }
+
+        function displayResult(data) {
+            const verdictClass = `verdict-${data.verdict}`;
+            const verdictText = data.verdict.charAt(0).toUpperCase() + data.verdict.slice(1);
+            const icon = data.verdict === 'clean' ? '✅' : data.verdict === 'warning' ? '⚠️' : '❌';
+
+            let html = `
+                <div style="text-align: center;">
+                    <span class="verdict-badge ${verdictClass}">${icon} ${verdictText}</span>
+                </div>
+
+                <h3>Summary</h3>
+                <div class="info-row">
+                    <span class="info-label">Total Checks</span>
+                    <span class="info-value">${data.summary.totalChecks}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Passed</span>
+                    <span class="info-value" style="color: #22c55e;">${data.summary.passed}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Warnings</span>
+                    <span class="info-value" style="color: #f59e0b;">${data.summary.warnings}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Critical</span>
+                    <span class="info-value" style="color: #ef4444;">${data.summary.critical}</span>
+                </div>
+
+                <h3>Image Info</h3>
+                <div class="info-row">
+                    <span class="info-label">Dimensions</span>
+                    <span class="info-value">${data.imageInfo.width} × ${data.imageInfo.height} px</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Format</span>
+                    <span class="info-value">${data.imageInfo.format.split('/')[1].toUpperCase()}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">EXIF</span>
+                    <span class="info-value">${data.imageInfo.hasExif ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Processing Time</span>
+                    <span class="info-value">${data.timing.processingMs} ms</span>
+                </div>
+
+                <h3>Checks</h3>
+            `;
+
+            data.checks.forEach(check => {
+                const checkClass = check.passed ? 'passed' : 
+                                 check.severity === 'critical' ? 'failed-critical' : 'failed-warning';
+                const checkIcon = check.passed ? '✅' : check.severity === 'critical' ? '❌' : '⚠️';
+                
+                html += `
+                    <div class="check-item ${checkClass}">
+                        <div class="check-name">${checkIcon} ${check.name.replace(/_/g, ' ')}</div>
+                        <div class="check-message">${check.message}</div>
+                    </div>
+                `;
+            });
+
+            resultContent.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

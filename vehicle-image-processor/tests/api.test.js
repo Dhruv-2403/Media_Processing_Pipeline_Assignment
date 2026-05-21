@@ -1,9 +1,16 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+
 const BASE = `http://localhost:${process.env.TEST_PORT || 3000}`;
 let passed = 0;
 let failed = 0;
+
+// ANSI color codes
+const PASS = "\x1b[32m✓\x1b[0m";
+const FAIL = "\x1b[31m✗\x1b[0m";
+const YELLOW = (text) => `\x1b[33m${text}\x1b[0m`;
+
 function get(urlPath) {
   return new Promise((resolve, reject) => {
     http.get(`${BASE}${urlPath}`, (res) => {
