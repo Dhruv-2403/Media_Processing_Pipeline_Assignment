@@ -9,8 +9,13 @@ import jobsRouter from './api/jobs';
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true
+  origin: [
+    'https://media-processing-pipeline-assignmen.vercel.app/'
+    
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
